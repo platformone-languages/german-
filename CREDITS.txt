@@ -1,0 +1,11 @@
+Platform One - credits for the German voice
+
+Voice: Thorsten Mueller, Thorsten-Voice project - https://www.thorsten-voice.de
+  Recordings: Thorsten-Voice datasets, public domain (CC0 1.0)
+    https://github.com/thorstenMueller/Thorsten-Voice
+  Voice model: Thorsten-Voice VITS model (Coqui TTS), trained by the Thorsten-Voice project
+    on those recordings, released under the Apache License 2.0.
+    https://huggingface.co/Thorsten-Voice/VITS
+
+Every recording in the audio folders (audio, audio2, audio3) was generated with that model.
+The model itself is not included here; only the audio it produced.

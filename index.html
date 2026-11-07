@@ -5727,7 +5727,21 @@ if(STANDALONE){
   try{const l=document.createElement("link");l.rel="manifest";l.href="manifest.webmanifest";document.head.appendChild(l);
     const a=document.createElement("link");a.rel="apple-touch-icon";a.href="icon-192.png";document.head.appendChild(a);
     const m=document.createElement("meta");m.name="theme-color";m.content="#F2C200";document.head.appendChild(m)}catch(e){}
-  if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(()=>{});
+  /* Updates reach everyone: when the app opens and whenever it comes back on screen, it asks the site which
+     version is live (version.json, never from a cache). If that is newer than this page, it loads the new one once. */
+  const BUILD="2026-11-07-1";
+  function checkUpdate(){
+    fetch("version.json?t="+Date.now(),{cache:"no-store"}).then(r=>r.ok?r.json():null).then(j=>{
+      if(!j||!j.v||j.v===BUILD)return;
+      let done={};try{done=JSON.parse(sessionStorage.getItem("p1-upd")||"{}")}catch(e){}
+      if(done[j.v])return; done[j.v]=1; try{sessionStorage.setItem("p1-upd",JSON.stringify(done))}catch(e){}
+      const sw=("serviceWorker" in navigator)?navigator.serviceWorker.getRegistration().then(r=>r&&r.update()).catch(()=>{}):Promise.resolve();
+      Promise.race([sw,new Promise(r=>setTimeout(r,3000))]).then(()=>location.replace(location.pathname+"?v="+encodeURIComponent(j.v)+location.hash));
+    }).catch(()=>{});
+  }
+  if("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).catch(()=>{});
+  checkUpdate();
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate()});
   if(pushReady()){window.OneSignalDeferred=window.OneSignalDeferred||[];const s=document.createElement("script");s.src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js";s.defer=true;document.head.appendChild(s);
     OneSignalDeferred.push(async OS=>{await OS.init({appId:PUSH.onesignalAppId,serviceWorkerPath:location.pathname.replace(/[^/]*$/,"").slice(1)+"sw.js",serviceWorkerParam:{scope:location.pathname.replace(/[^/]*$/,"")}})})}
 }
